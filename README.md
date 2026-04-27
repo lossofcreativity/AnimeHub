@@ -195,7 +195,7 @@ Contributions are welcome! Feel free to:
 
 ## 👨‍💻 Author
 
-Created with ❤️ for anime fans everywhere!
+Created by Avaya Shrestha ``https://github.com/lossofcreativity``
 
 ## 📞 Support
 
