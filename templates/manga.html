@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}{{ manga.title }} - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-background" style="background-image: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6)), url('{{ manga.images.jpg.image_url }}');">
+        <div class="detail-overlay">
+            <div class="detail-header">
+                <a href="{{ url_for('manga_search') }}" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                <div class="detail-title-section">
+                    <h1 class="detail-title">{{ manga.title }}</h1>
+                    {% if manga.title_japanese %}
+                    <p class="detail-subtitle">{{ manga.title_japanese }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="detail-content">
+        <div class="detail-grid">
+            <div class="detail-sidebar">
+                <div class="detail-poster">
+                    <img src="{{ manga.images.jpg.image_url }}" alt="{{ manga.title }}">
+                    {% if in_readinglist %}
+                    <button class="btn btn-primary btn-block remove-from-readinglist" data-manga-id="{{ manga.mal_id }}">
+                        <i class="fas fa-check"></i>
+                        In Reading List
+                    </button>
+                    {% else %}
+                    <button class="btn btn-primary btn-block add-to-readinglist" data-manga-id="{{ manga.mal_id }}" data-manga-title="{{ manga.title }}" data-manga-image="{{ manga.images.jpg.image_url }}">
+                        <i class="fas fa-plus"></i>
+                        Add to Reading List
+                    </button>
+                    {% endif %}
+                </div>
+                
+                <div class="detail-stats">
+                    {% if manga.score %}
+                    <div class="stat">
+                        <div class="stat-label">Rating</div>
+                        <div class="stat-value">{{ "%.1f" | format(manga.score) }}/10</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if manga.scored_by %}
+                    <div class="stat">
+                        <div class="stat-label">Voted by</div>
+                        <div class="stat-value">{{ "{:,}".format(manga.scored_by) }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if manga.type %}
+                    <div class="stat">
+                        <div class="stat-label">Type</div>
+                        <div class="stat-value">{{ manga.type }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if manga.chapters %}
+                    <div class="stat">
+                        <div class="stat-label">Chapters</div>
+                        <div class="stat-value">{{ manga.chapters }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if manga.volumes %}
+                    <div class="stat">
+                        <div class="stat-label">Volumes</div>
+                        <div class="stat-value">{{ manga.volumes }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if manga.status %}
+                    <div class="stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value">{{ manga.status }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if manga.published.string %}
+                    <div class="stat">
+                        <div class="stat-label">Published</div>
+                        <div class="stat-value">{{ manga.published.string }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-main">
+                {% if manga.synopsis %}
+                <section class="detail-section">
+                    <h2 class="section-title">Synopsis</h2>
+                    <p class="synopsis-text">{{ manga.synopsis }}</p>
+                </section>
+                {% endif %}
+                
+                {% if manga.genres %}
+                <section class="detail-section">
+                    <h2 class="section-title">Genres</h2>
+                    <div class="tag-list">
+                        {% for genre in manga.genres %}
+                        <span class="tag">{{ genre.name }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                
+                {% if manga.themes %}
+                <section class="detail-section">
+                    <h2 class="section-title">Themes</h2>
+                    <div class="tag-list">
+                        {% for theme in manga.themes %}
+                        <span class="tag">{{ theme.name }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                
+                {% if manga.authors %}
+                <section class="detail-section">
+                    <h2 class="section-title">Authors</h2>
+                    <div class="authors-list">
+                        {% for author in manga.authors %}
+                        <a href="{{ url_for('author_detail', author_id=author.mal_id) }}" class="author-link">
+                            <i class="fas fa-pen-fancy"></i>
+                            {{ author.name }}
+                            <span class="author-role">({{ author.type }})</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                
+                {% if manga.serializations %}
+                <section class="detail-section">
+                    <h2 class="section-title">Serializations</h2>
+                    <div class="tag-list">
+                        {% for serialization in manga.serializations %}
+                        <span class="tag">{{ serialization.name }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                
+                {% if manga.demographics %}
+                <section class="detail-section">
+                    <h2 class="section-title">Demographics</h2>
+                    <div class="tag-list">
+                        {% for demographic in manga.demographics %}
+                        <span class="tag">{{ demographic.name }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add to Reading List
+    document.querySelectorAll('.add-to-readinglist').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const mangaId = this.getAttribute('data-manga-id');
+            const mangaTitle = this.getAttribute('data-manga-title');
+            const mangaImage = this.getAttribute('data-manga-image');
+            
+            fetch('{{ url_for("add_to_readinglist") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    manga_id: mangaId,
+                    manga_title: mangaTitle,
+                    manga_image: mangaImage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.innerHTML = '<i class="fas fa-check"></i> In Reading List';
+                    this.classList.add('remove-from-readinglist');
+                    this.classList.remove('add-to-readinglist');
+                    showNotification('Added to Reading List!', 'success');
+                }
+            })
+            .catch(error => showNotification('Error', 'error'));
+        });
+    });
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

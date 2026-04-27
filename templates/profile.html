@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-background">
+            <div class="gradient-circle"></div>
+        </div>
+        
+        <div class="profile-content">
+            <div class="profile-avatar-section">
+                <img src="{{ profile.profile_image }}" alt="{{ user.username }}" class="profile-avatar">
+                {% if profile.is_online %}
+                <div class="status-indicator online">
+                    <i class="fas fa-circle"></i>
+                </div>
+                {% else %}
+                <div class="status-indicator offline">
+                    <i class="fas fa-circle"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="profile-info">
+                <h1 class="profile-username">{{ user.username }}</h1>
+                <p class="profile-email"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                
+                {% if profile.location %}
+                <p class="profile-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ profile.location }}
+                </p>
+                {% endif %}
+                
+                <p class="profile-detail">
+                    <i class="fas fa-calendar"></i>
+                    Joined {{ profile.joined_at.strftime('%B %d, %Y') }}
+                </p>
+                
+                {% if profile.is_online %}
+                <p class="profile-status-text online-text">
+                    <i class="fas fa-circle"></i>
+                    Currently Online
+                </p>
+                {% else %}
+                <p class="profile-status-text offline-text">
+                    <i class="fas fa-circle"></i>
+                    Last seen {{ profile.last_seen.strftime('%H:%M') }}
+                </p>
+                {% endif %}
+                
+                {% if user.id == session.user_id %}
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Edit Profile
+                </a>
+                {% else %}
+                <a href="{{ url_for('private_chat', user_id=user.id) }}" class="btn btn-primary">
+                    <i class="fas fa-comments"></i>
+                    Send Message
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile-body">
+        <div class="profile-grid">
+            <div class="profile-sidebar">
+                {% if profile.bio %}
+                <div class="profile-section">
+                    <h3 class="profile-section-title">About</h3>
+                    <p class="profile-bio">{{ profile.bio }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="profile-section">
+                    <h3 class="profile-section-title">Favorites</h3>
+                    <div class="favorites-list">
+                        {% if profile.favorite_anime %}
+                        <div class="favorite-item">
+                            <span class="favorite-label">Favorite Anime</span>
+                            <span class="favorite-value">{{ profile.favorite_anime }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if profile.favorite_manga %}
+                        <div class="favorite-item">
+                            <span class="favorite-label">Favorite Manga</span>
+                            <span class="favorite-value">{{ profile.favorite_manga }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-main">
+                <div class="profile-stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>{{ watchlist_count }}</h4>
+                            <p>Anime Watched</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>{{ readinglist_count }}</h4>
+                            <p>Manga Read</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if user.watchlist %}
+                <div class="profile-section">
+                    <h3 class="profile-section-title">Recent Watchlist</h3>
+                    <div class="watchlist-preview">
+                        {% for item in user.watchlist[:6] %}
+                        <div class="preview-item">
+                            <img src="{{ item.anime_image }}" alt="{{ item.anime_title }}" loading="lazy">
+                            <p class="item-title">{{ item.anime_title[:30] }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if user.id == session.user_id %}
+                    <a href="{{ url_for('watchlist') }}" class="btn btn-sm btn-primary">
+                        View All Anime
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if user.readinglist %}
+                <div class="profile-section">
+                    <h3 class="profile-section-title">Recent Reading List</h3>
+                    <div class="readinglist-preview">
+                        {% for item in user.readinglist[:6] %}
+                        <div class="preview-item">
+                            <img src="{{ item.manga_image }}" alt="{{ item.manga_title }}" loading="lazy">
+                            <p class="item-title">{{ item.manga_title[:30] }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if user.id == session.user_id %}
+                    <a href="{{ url_for('readinglist') }}" class="btn btn-sm btn-primary">
+                        View All Manga
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    margin-bottom: 3rem;
+}
+
+.profile-header {
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+.profile-background {
+    height: 300px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 110, 0.1));
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: -80px;
+    position: relative;
+}
+
+.profile-content {
+    display: flex;
+    gap: 3rem;
+    align-items: flex-end;
+    padding: 0 2rem 2rem 2rem;
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.profile-avatar-section {
+    position: relative;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 15px;
+    border: 4px solid var(--primary-color);
+    object-fit: cover;
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.status-indicator.online {
+    background: var(--success);
+    color: var(--bg-dark);
+}
+
+.status-indicator.offline {
+    background: var(--text-secondary);
+    color: var(--bg-dark);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-username {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.profile-email,
+.profile-detail {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-status-text {
+    margin: 1rem 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.online-text {
+    color: var(--success);
+}
+
+.offline-text {
+    color: var(--text-secondary);
+}
+
+.profile-body {
+    margin-top: 2rem;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 3rem;
+}
+
+.profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.profile-section {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.profile-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.profile-bio {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.favorite-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.8rem;
+    background: rgba(0, 212, 255, 0.05);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+}
+
+.favorite-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.favorite-value {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.profile-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.stat-box {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+}
+
+.stat-info h4 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.watchlist-preview,
+.readinglist-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.preview-item {
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.preview-item:hover img {
+    transform: scale(1.05);
+}
+
+.item-title {
+    padding: 0.8rem;
+    background: rgba(0, 212, 255, 0.05);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to <span class="accent-text">AnimeHub</span></h1>
+        <p class="hero-subtitle">Discover, Track, and Enjoy Your Favorite Anime & Manga</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('anime_search') }}" class="btn btn-primary">
+                <i class="fas fa-play"></i>
+                Browse Anime
+            </a>
+            <a href="{{ url_for('manga_search') }}" class="btn btn-secondary">
+                <i class="fas fa-book"></i>
+                Browse Manga
+            </a>
+        </div>
+    </div>
+    <div class="hero-background">
+        <div class="gradient-circle"></div>
+        <div class="floating-anime-icons">
+            <span class="anime-icon">📺</span>
+            <span class="anime-icon">📖</span>
+            <span class="anime-icon">✨</span>
+            <span class="anime-icon">⭐</span>
+        </div>
+    </div>
+</div>
+
+<section class="content-section">
+    <div class="section-header">
+        <h2 class="section-title">
+            <i class="fas fa-star"></i>
+            Top Anime
+        </h2>
+        <a href="{{ url_for('anime_search') }}" class="view-all-link">
+            View All <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    
+    {% if top_anime %}
+    <div class="anime-grid">
+        {% for anime in top_anime %}
+        <div class="anime-card" data-anime-id="{{ anime.mal_id }}">
+            <div class="anime-card-image">
+                <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.title }}" loading="lazy">
+                <div class="anime-card-overlay">
+                    <a href="{{ url_for('anime_detail', anime_id=anime.mal_id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i>
+                        View
+                    </a>
+                    <button class="btn btn-sm btn-secondary add-to-watchlist" data-anime-id="{{ anime.mal_id }}" data-anime-title="{{ anime.title }}" data-anime-image="{{ anime.images.jpg.image_url }}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                {% if anime.score %}
+                <div class="anime-rating">
+                    <i class="fas fa-star"></i>
+                    {{ "%.1f" | format(anime.score) }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="anime-card-content">
+                <h3 class="anime-title">{{ anime.title }}</h3>
+                <p class="anime-meta">
+                    <span class="meta-item">{{ anime.aired.prop.from.year if anime.aired.prop.from.year else 'N/A' }}</span>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No anime found</p>
+    {% endif %}
+</section>
+
+<section class="content-section">
+    <div class="section-header">
+        <h2 class="section-title">
+            <i class="fas fa-book"></i>
+            Top Manga
+        </h2>
+        <a href="{{ url_for('manga_search') }}" class="view-all-link">
+            View All <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    
+    {% if top_manga %}
+    <div class="manga-grid">
+        {% for manga in top_manga %}
+        <div class="manga-card" data-manga-id="{{ manga.mal_id }}">
+            <div class="manga-card-image">
+                <img src="{{ manga.images.jpg.image_url }}" alt="{{ manga.title }}" loading="lazy">
+                <div class="manga-card-overlay">
+                    <a href="{{ url_for('manga_detail', manga_id=manga.mal_id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i>
+                        View
+                    </a>
+                    <button class="btn btn-sm btn-secondary add-to-readinglist" data-manga-id="{{ manga.mal_id }}" data-manga-title="{{ manga.title }}" data-manga-image="{{ manga.images.jpg.image_url }}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                {% if manga.score %}
+                <div class="manga-rating">
+                    <i class="fas fa-star"></i>
+                    {{ "%.1f" | format(manga.score) }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="manga-card-content">
+                <h3 class="manga-title">{{ manga.title }}</h3>
+                <p class="manga-meta">
+                    <span class="meta-item">{{ manga.published.prop.from.year if manga.published.prop.from.year else 'N/A' }}</span>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No manga found</p>
+    {% endif %}
+</section>
+
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-play-circle"></i>
+            </div>
+            <h3 class="stat-title">10,000+</h3>
+            <p class="stat-description">Anime Titles</p>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <h3 class="stat-title">50,000+</h3>
+            <p class="stat-description">Manga Titles</p>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="stat-title">500K+</h3>
+            <p class="stat-description">Active Users</p>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <h3 class="stat-title">9.2/10</h3>
+            <p class="stat-description">Average Rating</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add to Watchlist
+    document.querySelectorAll('.add-to-watchlist').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const animeId = this.getAttribute('data-anime-id');
+            const animeTitle = this.getAttribute('data-anime-title');
+            const animeImage = this.getAttribute('data-anime-image');
+            
+            fetch('{{ url_for("add_to_watchlist") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    anime_id: animeId,
+                    anime_title: animeTitle,
+                    anime_image: animeImage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.classList.add('added');
+                    showNotification('Added to Watchlist!', 'success');
+                } else {
+                    showNotification('Already in Watchlist', 'info');
+                }
+            })
+            .catch(error => showNotification('Error adding to watchlist', 'error'));
+        });
+    });
+    
+    // Add to Reading List
+    document.querySelectorAll('.add-to-readinglist').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const mangaId = this.getAttribute('data-manga-id');
+            const mangaTitle = this.getAttribute('data-manga-title');
+            const mangaImage = this.getAttribute('data-manga-image');
+            
+            fetch('{{ url_for("add_to_readinglist") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    manga_id: mangaId,
+                    manga_title: mangaTitle,
+                    manga_image: mangaImage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.classList.add('added');
+                    showNotification('Added to Reading List!', 'success');
+                } else {
+                    showNotification('Already in Reading List', 'info');
+                }
+            })
+            .catch(error => showNotification('Error adding to reading list', 'error'));
+        });
+    });
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

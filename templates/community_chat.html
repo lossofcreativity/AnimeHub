@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Community Chat - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="community-chat-container">
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">
+                <i class="fas fa-comments"></i>
+                Community Chat
+            </h3>
+        </div>
+        
+        <div class="anime-topics">
+            <h4 class="topics-title">Popular Anime Topics</h4>
+            <a href="{{ url_for('community_chat') }}" class="topic-item {% if not anime_filter %}active{% endif %}">
+                <i class="fas fa-earth"></i>
+                All Topics
+            </a>
+            <a href="{{ url_for('community_chat', anime='Attack%20on%20Titan') }}" class="topic-item">
+                <i class="fas fa-star"></i>
+                Attack on Titan
+            </a>
+            <a href="{{ url_for('community_chat', anime='One%20Piece') }}" class="topic-item">
+                <i class="fas fa-star"></i>
+                One Piece
+            </a>
+            <a href="{{ url_for('community_chat', anime='Naruto') }}" class="topic-item">
+                <i class="fas fa-star"></i>
+                Naruto
+            </a>
+            <a href="{{ url_for('community_chat', anime='My%20Hero%20Academia') }}" class="topic-item">
+                <i class="fas fa-star"></i>
+                My Hero Academia
+            </a>
+        </div>
+    </div>
+    
+    <div class="chat-main">
+        <div class="chat-header-main">
+            <h2 class="chat-title">
+                {% if anime_filter %}
+                Discussing: {{ anime_filter }}
+                {% else %}
+                Community Discussion
+                {% endif %}
+            </h2>
+        </div>
+        
+        <div class="chat-messages-area" id="communityMessages">
+            {% for msg_data in messages %}
+            <div class="community-message">
+                <div class="message-header">
+                    <img src="{{ msg_data.sender_avatar }}" alt="{{ msg_data.sender_username }}" class="message-avatar">
+                    <strong class="message-author">{{ msg_data.sender_username }}</strong>
+                    <span class="message-time">{{ msg_data.message.created_at.strftime('%H:%M %d-%b') }}</span>
+                </div>
+                <p class="message-text">{{ msg_data.message.content }}</p>
+                {% if msg_data.message.anime_topic %}
+                <span class="message-topic">
+                    <i class="fas fa-tag"></i>
+                    {{ msg_data.message.anime_topic }}
+                </span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="chat-input-section">
+            <textarea 
+                id="communityMessageInput" 
+                placeholder="Share your thoughts with the community..."
+                class="community-textarea"
+            ></textarea>
+            <div class="input-controls">
+                <input 
+                    type="text" 
+                    id="animeTopicInput" 
+                    placeholder="Anime topic (optional)"
+                    class="topic-input"
+                >
+                <button id="sendCommunityButton" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Post
+                </button>
+            </div>
+        </div>
+        
+        {% if messages_paginated.pages > 1 %}
+        <div class="pagination">
+            {% if messages_paginated.has_prev %}
+            <a href="?page={{ messages_paginated.prev_num }}" class="btn btn-sm">
+                <i class="fas fa-chevron-left"></i>
+                Previous
+            </a>
+            {% endif %}
+            
+            <span class="page-info">Page {{ messages_paginated.page }} of {{ messages_paginated.pages }}</span>
+            
+            {% if messages_paginated.has_next %}
+            <a href="?page={{ messages_paginated.next_num }}" class="btn btn-sm">
+                Next
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.community-chat-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+    min-height: 600px;
+    margin-bottom: 3rem;
+}
+
+.chat-sidebar {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.sidebar-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.sidebar-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+}
+
+.anime-topics {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.topics-title {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.topic-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.topic-item:hover {
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.topic-item.active {
+    color: var(--primary-color);
+    background: rgba(0, 212, 255, 0.1);
+    border-left-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.chat-main {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-main {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chat-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.chat-messages-area {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    max-height: 400px;
+}
+
+.community-message {
+    background: rgba(0, 212, 255, 0.05);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    animation: slideIn 0.3s ease;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.message-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+.message-author {
+    color: var(--primary-color);
+}
+
+.message-time {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.message-text {
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+.message-topic {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 0, 110, 0.1);
+    color: var(--secondary-color);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.chat-input-section {
+    border-top: 2px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.community-textarea {
+    width: 100%;
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 1rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    min-height: 80px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    resize: none;
+}
+
+.community-textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    outline: none;
+}
+
+.input-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.topic-input {
+    flex: 1;
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.topic-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.topic-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Scrollbar */
+.chat-messages-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages-area::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.chat-messages-area::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+@media (max-width: 1024px) {
+    .community-chat-container {
+        grid-template-columns: 1fr;
+    }
+
+    .chat-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .message-header {
+        flex-wrap: wrap;
+    }
+
+    .input-controls {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+const currentUserId = {{ session.user_id }};
+
+// Send community message
+document.getElementById('sendCommunityButton').addEventListener('click', function() {
+    const content = document.getElementById('communityMessageInput').value.trim();
+    const animeTopic = document.getElementById('animeTopicInput').value.trim();
+    
+    if (!content) {
+        alert('Please write a message');
+        return;
+    }
+    
+    fetch('{{ url_for("send_message") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            content: content,
+            is_public: true,
+            anime_topic: animeTopic || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'sent') {
+            document.getElementById('communityMessageInput').value = '';
+            document.getElementById('animeTopicInput').value = '';
+            location.reload(); // Refresh to show new message
+        }
+    });
+});
+
+// Load messages periodically
+setInterval(() => {
+    fetch(`{{ url_for('get_community_messages', anime=anime_filter or '') }}`)
+        .then(response => response.json())
+        .then(messages => {
+            const messagesArea = document.getElementById('communityMessages');
+            messagesArea.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'community-message';
+                
+                const time = new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                let topicHtml = '';
+                if (message.anime_topic) {
+                    topicHtml = `<span class="message-topic"><i class="fas fa-tag"></i> ${message.anime_topic}</span>`;
+                }
+                
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <strong class="message-author">${message.sender_username}</strong>
+                        <span class="message-time">${time}</span>
+                    </div>
+                    <p class="message-text">${message.content}</p>
+                    ${topicHtml}
+                `;
+                messagesArea.appendChild(messageDiv);
+            });
+        });
+}, 3000);
+</script>
+{% endblock %}

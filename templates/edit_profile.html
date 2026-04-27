@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <div class="edit-profile-header">
+        <a href="{{ url_for('profile', user_id=session.user_id) }}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Profile
+        </a>
+        <h1 class="edit-title">
+            <i class="fas fa-user-edit"></i>
+            Edit Your Profile
+        </h1>
+    </div>
+    
+    <div class="edit-profile-card">
+        <form method="POST" enctype="multipart/form-data" class="edit-profile-form">
+            <div class="form-section">
+                <h3 class="form-section-title">Profile Picture</h3>
+                <p class="form-description">Upload a photo or enter an image URL</p>
+                
+                <div class="image-preview">
+                    <img id="imagePreview" src="{{ profile.profile_image }}" alt="Profile Preview">
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile_picture">
+                        <i class="fas fa-upload"></i>
+                        Upload Photo
+                    </label>
+                    <input 
+                        type="file" 
+                        id="profile_picture" 
+                        name="profile_picture" 
+                        accept="image/png,image/jpeg,image/gif,image/webp"
+                        class="form-input"
+                    >
+                    <small class="form-hint">Max 5MB. Formats: PNG, JPG, GIF, WebP</small>
+                </div>
+                
+                <div class="form-divider">
+                    <span>OR</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile_image_url">
+                        <i class="fas fa-image"></i>
+                        Image URL
+                    </label>
+                    <input 
+                        type="url" 
+                        id="profile_image_url" 
+                        name="profile_image_url" 
+                        value="{{ profile.profile_image }}"
+                        placeholder="https://example.com/avatar.jpg"
+                        class="form-input"
+                    >
+                    <small class="form-hint">Popular sources: Gravatar, Imgur, AniList, etc.</small>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">About You</h3>
+                
+                <div class="form-group">
+                    <label for="bio">
+                        <i class="fas fa-pen"></i>
+                        Bio
+                    </label>
+                    <textarea 
+                        id="bio" 
+                        name="bio" 
+                        placeholder="Tell us about yourself..."
+                        class="form-textarea"
+                        maxlength="500"
+                    >{{ profile.bio or '' }}</textarea>
+                    <small class="form-hint">Maximum 500 characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location
+                    </label>
+                    <input 
+                        type="text" 
+                        id="location" 
+                        name="location" 
+                        value="{{ profile.location or '' }}"
+                        placeholder="City, Country"
+                        class="form-input"
+                    >
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3 class="form-section-title">Favorites</h3>
+                
+                <div class="form-group">
+                    <label for="favorite_anime">
+                        <i class="fas fa-play-circle"></i>
+                        Favorite Anime
+                    </label>
+                    <input 
+                        type="text" 
+                        id="favorite_anime" 
+                        name="favorite_anime" 
+                        value="{{ profile.favorite_anime or '' }}"
+                        placeholder="e.g., Attack on Titan"
+                        class="form-input"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="favorite_manga">
+                        <i class="fas fa-book"></i>
+                        Favorite Manga
+                    </label>
+                    <input 
+                        type="text" 
+                        id="favorite_manga" 
+                        name="favorite_manga" 
+                        value="{{ profile.favorite_manga or '' }}"
+                        placeholder="e.g., One Piece"
+                        class="form-input"
+                    >
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+                <a href="{{ url_for('profile', user_id=session.user_id) }}" class="btn btn-secondary btn-large">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.edit-profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.edit-profile-header {
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.edit-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-profile-card {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 3rem;
+}
+
+.form-section {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-description {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.image-preview {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.image-preview img {
+    width: 150px;
+    height: 150px;
+    border-radius: 15px;
+    object-fit: cover;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--primary-color);
+}
+
+.form-input,
+.form-textarea {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    outline: none;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-hint {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-large {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .edit-profile-card {
+        padding: 1.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Live preview of image URL
+document.getElementById('profile_image').addEventListener('change', function() {
+    const preview = document.getElementById('imagePreview');
+    preview.src = this.value || 'https://via.placeholder.com/150?text=No+Avatar';
+});
+</script>
+{% endblock %}

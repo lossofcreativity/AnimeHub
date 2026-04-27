@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Authors - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="authors-container">
+    <div class="authors-header">
+        <h1 class="authors-title">
+            <i class="fas fa-pen-fancy"></i>
+            Explore Authors
+        </h1>
+        <p class="authors-subtitle">Discover talented manga authors and creators</p>
+        
+        <form method="GET" class="search-form-large">
+            <div class="search-input-wrapper">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ query }}"
+                    placeholder="Search authors..." 
+                    class="search-input-large"
+                    autocomplete="off"
+                >
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    {% if authors %}
+    <div class="authors-grid">
+        {% for author in authors %}
+        <div class="author-card">
+            <div class="author-card-image">
+                {% if author.images.jpg.image_url %}
+                <img src="{{ author.images.jpg.image_url }}" alt="{{ author.name }}" loading="lazy">
+                {% else %}
+                <div class="no-image">
+                    <i class="fas fa-user"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="author-card-content">
+                <h3 class="author-name">{{ author.name }}</h3>
+                
+                {% if author.given_name or author.family_name %}
+                <p class="author-meta">
+                    {% if author.given_name %}
+                    <span>{{ author.given_name }}</span>
+                    {% endif %}
+                    {% if author.family_name %}
+                    <span>{{ author.family_name }}</span>
+                    {% endif %}
+                </p>
+                {% endif %}
+                
+                <div class="author-stats">
+                    {% if author.favorites %}
+                    <div class="stat">
+                        <i class="fas fa-heart"></i>
+                        <span>{{ author.favorites }} Fans</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <a href="{{ url_for('author_detail', author_id=author.mal_id) }}" class="btn btn-sm btn-primary btn-block">
+                    <i class="fas fa-arrow-right"></i>
+                    View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="?q={{ query }}&page={{ page - 1 }}" class="btn btn-sm">
+            <i class="fas fa-chevron-left"></i>
+            Previous
+        </a>
+        {% endif %}
+        
+        <span class="page-info">Page {{ page }}</span>
+        
+        <a href="?q={{ query }}&page={{ page + 1 }}" class="btn btn-sm">
+            Next
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-pen-fancy"></i>
+        <h3>No Authors Found</h3>
+        <p>Try different search keywords</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.authors-container {
+    margin-bottom: 3rem;
+}
+
+.authors-header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.authors-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.authors-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.authors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.author-card {
+    background: rgba(26, 31, 58, 0.3);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.author-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+    transform: translateY(-10px);
+}
+
+.author-card-image {
+    width: 100%;
+    height: 250px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 110, 0.1));
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.author-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.author-card:hover .author-card-image img {
+    transform: scale(1.05);
+}
+
+.no-image {
+    font-size: 3rem;
+    color: var(--primary-color);
+    opacity: 0.5;
+}
+
+.author-card-content {
+    padding: 1.5rem;
+}
+
+.author-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.author-meta {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.author-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.author-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.author-stats .stat i {
+    color: var(--secondary-color);
+}
+</style>
+{% endblock %}

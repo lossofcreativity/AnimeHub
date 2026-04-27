@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Users - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="users-container">
+    <div class="users-header">
+        <h1 class="users-title">
+            <i class="fas fa-users"></i>
+            Explore Community
+        </h1>
+        <p class="users-subtitle">Connect with anime enthusiasts around the world</p>
+        
+        <form method="GET" class="users-search-form">
+            <div class="search-input-wrapper">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Search users by username..." 
+                    class="search-input-large"
+                    autocomplete="off"
+                >
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    {% if users.items %}
+    <div class="users-grid">
+        {% for user in users.items %}
+        {% set profile = user_profiles.get(user.id) %}
+        <div class="user-card">
+            <div class="user-card-header">
+                <img src="{{ profile.profile_image if profile else 'https://via.placeholder.com/150?text=No+Avatar' }}" 
+                     alt="{{ user.username }}" 
+                     class="user-avatar-large">
+                {% if profile and profile.is_online %}
+                <div class="online-badge">
+                    <i class="fas fa-circle"></i>
+                    Online
+                </div>
+                {% else %}
+                <div class="offline-badge">
+                    <i class="fas fa-circle"></i>
+                    Offline
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="user-card-content">
+                <h3 class="user-name">{{ user.username }}</h3>
+                
+                {% if profile and profile.location %}
+                <p class="user-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ profile.location }}
+                </p>
+                {% endif %}
+                
+                {% if profile and profile.bio %}
+                <p class="user-bio">{{ profile.bio[:100] }}{% if profile.bio|length > 100 %}...{% endif %}</p>
+                {% endif %}
+                
+                <div class="user-stats">
+                    <div class="stat">
+                        <span class="stat-value">{{ user.watchlist|length }}</span>
+                        <span class="stat-label">Anime</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">{{ user.readinglist|length }}</span>
+                        <span class="stat-label">Manga</span>
+                    </div>
+                </div>
+                
+                <div class="user-card-actions">
+                    <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-user"></i>
+                        View Profile
+                    </a>
+                    {% if user.id != session.user_id %}
+                    <a href="{{ url_for('private_chat', user_id=user.id) }}" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-comments"></i>
+                        Chat
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="pagination">
+        {% if users.has_prev %}
+        <a href="?page={{ users.prev_num }}" class="btn btn-sm">
+            <i class="fas fa-chevron-left"></i>
+            Previous
+        </a>
+        {% endif %}
+        
+        <span class="page-info">Page {{ users.page }} of {{ users.pages }}</span>
+        
+        {% if users.has_next %}
+        <a href="?page={{ users.next_num }}" class="btn btn-sm">
+            Next
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <h3>No Users Found</h3>
+        <p>Start exploring the anime community</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

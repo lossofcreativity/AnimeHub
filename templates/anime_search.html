@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Anime Search - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="search-header">
+        <h1 class="search-title">
+            <i class="fas fa-play-circle"></i>
+            Explore Anime
+        </h1>
+        <form method="GET" class="search-form-large">
+            <div class="search-input-wrapper">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ query }}" 
+                    placeholder="Search anime by title..." 
+                    class="search-input-large"
+                    autocomplete="off"
+                >
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    {% if query %}
+    <div class="search-results-header">
+        <h2>Search Results for "{{ query }}"</h2>
+        {% if results %}
+        <p class="result-count">Found {{ results|length }} anime</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if results %}
+    <div class="search-results-grid">
+        {% for anime in results %}
+        <div class="anime-card">
+            <div class="anime-card-image">
+                <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.title }}" loading="lazy">
+                <div class="anime-card-overlay">
+                    <a href="{{ url_for('anime_detail', anime_id=anime.mal_id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i>
+                        View
+                    </a>
+                    <button class="btn btn-sm btn-secondary add-to-watchlist" data-anime-id="{{ anime.mal_id }}" data-anime-title="{{ anime.title }}" data-anime-image="{{ anime.images.jpg.image_url }}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                {% if anime.score %}
+                <div class="anime-rating">
+                    <i class="fas fa-star"></i>
+                    {{ "%.1f" | format(anime.score) }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="anime-card-content">
+                <h3 class="anime-title">{{ anime.title }}</h3>
+                <p class="anime-meta">
+                    <span class="meta-item">{{ anime.type }}</span>
+                    {% if anime.aired.prop.from.year %}
+                    <span class="meta-item">{{ anime.aired.prop.from.year }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="?q={{ query }}&page={{ page - 1 }}" class="btn btn-sm">
+            <i class="fas fa-chevron-left"></i>
+            Previous
+        </a>
+        {% endif %}
+        
+        <span class="page-info">Page {{ page }}</span>
+        
+        <a href="?q={{ query }}&page={{ page + 1 }}" class="btn btn-sm">
+            Next
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+    {% elif query %}
+    <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <h3>No Results Found</h3>
+        <p>Try searching with different keywords</p>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <h3>Start Searching</h3>
+        <p>Use the search box above to find your favorite anime</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Add to Watchlist
+    document.querySelectorAll('.add-to-watchlist').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const animeId = this.getAttribute('data-anime-id');
+            const animeTitle = this.getAttribute('data-anime-title');
+            const animeImage = this.getAttribute('data-anime-image');
+            
+            fetch('{{ url_for("add_to_watchlist") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    anime_id: animeId,
+                    anime_title: animeTitle,
+                    anime_image: animeImage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.classList.add('added');
+                    showNotification('Added to Watchlist!', 'success');
+                } else {
+                    showNotification('Already in Watchlist', 'info');
+                }
+            })
+            .catch(error => showNotification('Error adding to watchlist', 'error'));
+        });
+    });
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-code">404</div>
+        <h1 class="error-title">Oops! Page Not Found</h1>
+        <p class="error-message">The page you're looking for doesn't exist. It might have been removed or you may have mistyped the URL.</p>
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                Back to Home
+            </a>
+            <a href="{{ url_for('anime_search') }}" class="btn btn-secondary">
+                <i class="fas fa-search"></i>
+                Browse Anime
+            </a>
+        </div>
+    </div>
+    <div class="error-illustration">
+        <i class="fas fa-sad-tear"></i>
+    </div>
+</div>
+{% endblock %}

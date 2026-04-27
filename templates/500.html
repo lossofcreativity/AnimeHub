@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-code">500</div>
+        <h1 class="error-title">Server Error</h1>
+        <p class="error-message">Something went wrong on our end. Our team has been notified and is working to fix it.</p>
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                Back to Home
+            </a>
+            <a href="{{ url_for('anime_search') }}" class="btn btn-secondary">
+                <i class="fas fa-search"></i>
+                Browse Anime
+            </a>
+        </div>
+    </div>
+    <div class="error-illustration">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+</div>
+{% endblock %}

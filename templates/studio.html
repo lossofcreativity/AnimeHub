@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}{{ studio.name }} - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-header-simple">
+        <a href="{{ url_for('anime_search') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </a>
+        <h1 class="detail-title">
+            <i class="fas fa-building"></i>
+            {{ studio.name }}
+        </h1>
+    </div>
+    
+    <div class="detail-content">
+        <div class="detail-main">
+            <section class="detail-section">
+                <h2 class="section-title">Studio Information</h2>
+                <div class="info-grid">
+                    {% if studio.titles %}
+                    <div class="info-item">
+                        <h3>Titles</h3>
+                        {% for title in studio.titles[:5] %}
+                        <p>{{ title.title }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if studio.url %}
+                    <div class="info-item">
+                        <h3>Official Website</h3>
+                        <a href="{{ studio.url }}" target="_blank" class="external-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            Visit Studio
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+            
+            {% if studio.anime %}
+            <section class="detail-section">
+                <h2 class="section-title">Anime Productions</h2>
+                <div class="studio-anime-grid">
+                    {% for anime in studio.anime[:12] %}
+                    <div class="studio-anime-item">
+                        {% if anime.images.jpg.image_url %}
+                        <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.title }}" loading="lazy">
+                        {% endif %}
+                        <h4>{{ anime.title }}</h4>
+                        <a href="{{ url_for('anime_detail', anime_id=anime.mal_id) }}" class="btn btn-sm btn-primary">
+                            View
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

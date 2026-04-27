@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}My Reading List - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-header">
+        <h1 class="list-title">
+            <i class="fas fa-book"></i>
+            My Reading List
+        </h1>
+        <p class="list-subtitle">Total: {{ items|length }} manga</p>
+    </div>
+    
+    {% if items %}
+    <div class="list-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="Planning">Planning</button>
+        <button class="filter-btn" data-filter="Reading">Reading</button>
+        <button class="filter-btn" data-filter="Completed">Completed</button>
+    </div>
+    
+    <div class="list-grid">
+        {% for item in items %}
+        <div class="list-item" data-status="{{ item.status }}">
+            <div class="list-item-image">
+                <img src="{{ item.manga_image }}" alt="{{ item.manga_title }}" loading="lazy">
+                <div class="list-item-actions">
+                    <a href="{{ url_for('manga_detail', manga_id=item.manga_id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i>
+                        View
+                    </a>
+                    <button class="btn btn-sm btn-danger remove-btn" data-item-id="{{ item.id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="list-item-content">
+                <h3>{{ item.manga_title }}</h3>
+                <div class="list-item-info">
+                    <span class="status-badge" data-status="{{ item.status }}">{{ item.status }}</span>
+                    <span class="date-added">Added: {{ item.added_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="progress-section">
+                    <label>Chapters Read</label>
+                    <input type="number" class="chapters-input" value="{{ item.chapters_read }}" min="0" data-item-id="{{ item.id }}">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-book"></i>
+        <h3>Your reading list is empty</h3>
+        <p>Start adding manga to your reading list!</p>
+        <a href="{{ url_for('manga_search') }}" class="btn btn-primary">
+            <i class="fas fa-search"></i>
+            Browse Manga
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            const items = document.querySelectorAll('.list-item');
+            
+            items.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-status') === filter) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Remove from reading list
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            
+            if (confirm('Remove from reading list?')) {
+                fetch(`{{ url_for('remove_from_readinglist', item_id='') }}${itemId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'removed') {
+                        document.querySelector(`[data-item-id="${itemId}"]`).closest('.list-item').remove();
+                        showNotification('Removed from reading list', 'success');
+                    }
+                })
+                .catch(error => showNotification('Error removing item', 'error'));
+            }
+        });
+    });
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

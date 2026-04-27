@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ author.name }} - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-header-simple">
+        <a href="{{ url_for('anime_search') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </a>
+        <h1 class="detail-title">
+            <i class="fas fa-pen-fancy"></i>
+            {{ author.name }}
+        </h1>
+    </div>
+    
+    <div class="detail-content">
+        <div class="detail-grid">
+            <div class="detail-sidebar">
+                {% if author.images.jpg.image_url %}
+                <div class="detail-poster">
+                    <img src="{{ author.images.jpg.image_url }}" alt="{{ author.name }}">
+                </div>
+                {% endif %}
+                
+                <div class="detail-stats">
+                    {% if author.given_name %}
+                    <div class="stat">
+                        <div class="stat-label">Given Name</div>
+                        <div class="stat-value">{{ author.given_name }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if author.family_name %}
+                    <div class="stat">
+                        <div class="stat-label">Family Name</div>
+                        <div class="stat-value">{{ author.family_name }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if author.birthday %}
+                    <div class="stat">
+                        <div class="stat-label">Birthday</div>
+                        <div class="stat-value">{{ author.birthday }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if author.favorites %}
+                    <div class="stat">
+                        <div class="stat-label">Favorites</div>
+                        <div class="stat-value">{{ "{:,}".format(author.favorites) }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-main">
+                {% if author.about %}
+                <section class="detail-section">
+                    <h2 class="section-title">About</h2>
+                    <p class="synopsis-text">{{ author.about }}</p>
+                </section>
+                {% endif %}
+                
+                {% if author.manga %}
+                <section class="detail-section">
+                    <h2 class="section-title">Works</h2>
+                    <div class="works-list">
+                        {% for work in author.manga[:10] %}
+                        <div class="work-item">
+                            <i class="fas fa-book"></i>
+                            <div class="work-info">
+                                <h3>{{ work.title }}</h3>
+                                <span class="work-role">{{ work.role }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

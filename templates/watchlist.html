@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}My Watchlist - AnimeHub{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-header">
+        <h1 class="list-title">
+            <i class="fas fa-bookmark"></i>
+            My Watchlist
+        </h1>
+        <p class="list-subtitle">Total: {{ items|length }} anime</p>
+    </div>
+    
+    {% if items %}
+    <div class="list-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="Planning">Planning</button>
+        <button class="filter-btn" data-filter="Watching">Watching</button>
+        <button class="filter-btn" data-filter="Completed">Completed</button>
+    </div>
+    
+    <div class="list-grid">
+        {% for item in items %}
+        <div class="list-item" data-status="{{ item.status }}">
+            <div class="list-item-image">
+                <img src="{{ item.anime_image }}" alt="{{ item.anime_title }}" loading="lazy">
+                <div class="list-item-actions">
+                    <a href="{{ url_for('anime_detail', anime_id=item.anime_id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i>
+                        View
+                    </a>
+                    <button class="btn btn-sm btn-danger remove-btn" data-item-id="{{ item.id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="list-item-content">
+                <h3>{{ item.anime_title }}</h3>
+                <div class="list-item-info">
+                    <span class="status-badge" data-status="{{ item.status }}">{{ item.status }}</span>
+                    <span class="date-added">Added: {{ item.added_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="progress-section">
+                    <label>Episodes Watched</label>
+                    <input type="number" class="episodes-input" value="{{ item.episodes_watched }}" min="0" data-item-id="{{ item.id }}">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-bookmark"></i>
+        <h3>Your watchlist is empty</h3>
+        <p>Start adding anime to your watchlist!</p>
+        <a href="{{ url_for('anime_search') }}" class="btn btn-primary">
+            <i class="fas fa-search"></i>
+            Browse Anime
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            const items = document.querySelectorAll('.list-item');
+            
+            items.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-status') === filter) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Remove from watchlist
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            
+            if (confirm('Remove from watchlist?')) {
+                fetch(`{{ url_for('remove_from_watchlist', item_id='') }}${itemId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'removed') {
+                        document.querySelector(`[data-item-id="${itemId}"]`).closest('.list-item').remove();
+                        showNotification('Removed from watchlist', 'success');
+                    }
+                })
+                .catch(error => showNotification('Error removing item', 'error'));
+            }
+        });
+    });
+    
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}
