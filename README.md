@@ -1,3 +1,6 @@
+# The Production and development of the website has stopped after Beta v0.1.0 due to techincal errors!
+
+
 # 🎌 AnimeHub - Your Ultimate Anime & Manga Platform
 
 Welcome to **AnimeHub**, a stunning web application built with Python Flask that allows you to discover, track, and manage your favorite anime and manga!
